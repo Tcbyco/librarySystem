@@ -1,0 +1,72 @@
+<script src="../../librarySystem.js"></script>
+<script src="../simpletest.js"></script>
+<script> 
+
+tests({
+  'It should only run each library callback once.': function() {
+    var numberOfTimesCallbackHasRun = 0;
+    librarySystem('test', [], function(){
+      numberOfTimesCallbackHasRun++;
+      return 'callback should run once';
+    })
+    librarySystem('test');
+    librarySystem('test');
+    eq(numberOfTimesCallbackHasRun, 1);
+  },
+
+  'If a library has dependencies, they should be passed into the library callback during its execution.': function() {
+    librarySystem('I should be passed in.', [], function() {
+      return 'I should be passed in.'
+    });
+    librarySystem('I need a dep passed to me.', ['I should be passed in.'], function (dep) {
+      return dep;
+    });
+    var result = librarySystem('I need a dep passed to me.')
+    eq(result, 'I should be passed in.');
+  },
+
+  'It should accept libraries and dependencies in any order': function() {
+    // Adding a library before its dependency.
+    librarySystem('lib1', ['dep1'], function(dep) {
+      return dep;
+    });
+    librarySystem('dep1', [], function() {
+      return 'passed in dep1.';
+    });
+    var depTest = librarySystem('lib1');
+    eq(depTest, 'passed in dep1.');
+
+    // Adding a library after its dependency
+    librarySystem('dep2', [], function() {
+      return 'passed in dep2.';
+    });
+    
+    librarySystem('lib2', ['dep2'], function(dep) {
+      return dep;
+    });
+    var depTest = librarySystem('lib2');
+    eq(depTest, 'passed in dep2.');
+  },
+
+  'It should throw TypeError if a retrieved library is missing dependencies.' : function() {
+    var isError = false;
+    try {
+      librarySystem('libMissingDeps', ['mysteryDep'], function(dep){
+        return dep;
+      })
+      librarySystem('libMissingDeps');
+    } catch (error) {
+      isError = error instanceof TypeError;
+    }
+    eq(isError, true);
+  },
+
+  'It should handle any amount of nested dependencies': function() {
+    librarySystem('noDeps', [], function(){return 'noDeps'});
+    librarySystem('oneDep', ['noDeps'], function(dep){return `I can access ${dep}`});
+    librarySystem('2DepsDeep', ['oneDep'], function(dep){return `I can access oneDep, which says: ${dep}`});
+    var result = librarySystem('2DepsDeep');
+    eq (result, 'I can access oneDep, which says: I can access noDeps')
+  }
+})
+</script>
