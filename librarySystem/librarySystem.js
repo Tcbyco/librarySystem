@@ -1,22 +1,5 @@
 /* 
-Library Loading System with Dependencies
-
-Description
-Allows the user to store and retrieve libraries, including 
-any stored dependencies of those libraries.
-
-Function Signature
-librarySystem(libName[, dependencies[, callback]])
-
-Parameters
-libName: when this is the only argument provided,
-librarySystem will return the library of the same name from storage,
-including any dependencies.
-
-Return Value
-
-Examples
-
+Library Loading System 
 */  
 
 (function() {
